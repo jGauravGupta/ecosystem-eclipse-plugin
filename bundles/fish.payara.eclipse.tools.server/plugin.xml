@@ -823,13 +823,12 @@
             <and>
                 <count value="1"/>
                 <iterate ifEmpty="false">
-                    <and>
+                    <adapt type="org.eclipse.wst.server.core.IServer">
                         <test property="fish.payara.eclipse.tools.server.isWSLInstance"/>
-                    </and>
-                </iterate>     
+                    </adapt>
+                </iterate>
             </and>
         </definition>
-     
         <definition id="fish.payara.eclipse.tools.server.moreGlassfishSelected">
             <iterate ifEmpty="false">
                 <or>
