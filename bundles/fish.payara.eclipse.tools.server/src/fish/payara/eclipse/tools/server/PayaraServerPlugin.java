@@ -89,15 +89,22 @@ public class PayaraServerPlugin extends AbstractUIPlugin {
     @Override
     protected void initializeImageRegistry(ImageRegistry reg) {
         super.initializeImageRegistry(reg);
-        reg.put(GF_SERVER_IMG, createFromURL(getBundle().getEntry("icons/obj16/payara-blue.png")));
-        reg.put(EAR_MODULE_IMG, createFromURL(getBundle().getEntry("icons/obj16/ear.gif")));
-        reg.put(EJB_MODULE_IMG, createFromURL(getBundle().getEntry("icons/obj16/ejb_module.gif")));
-        reg.put(LOG_FILE_IMG, createFromURL(getBundle().getEntry("icons/obj16/logfile.png")));
-        reg.put(WEB_MODULE_IMG, createFromURL(getBundle().getEntry("icons/obj16/web_module.gif")));
-        reg.put(WEBSERVICE_IMG, createFromURL(getBundle().getEntry("icons/obj16/webservice.png")));
-        reg.put(RESOURCES_IMG, createFromURL(getBundle().getEntry("icons/obj16/resources.gif")));
-        reg.put(GF_WIZARD, createFromURL(getBundle().getEntry("icons/wizard75x66.png")));
-	}
+        registerImage(reg, GF_SERVER_IMG, "icons/obj16/payara-blue.png");
+        registerImage(reg, EAR_MODULE_IMG, "icons/obj16/ear.gif");
+        registerImage(reg, EJB_MODULE_IMG, "icons/obj16/ejb_module.gif");
+        registerImage(reg, LOG_FILE_IMG, "icons/obj16/logfile.png");
+        registerImage(reg, WEB_MODULE_IMG, "icons/obj16/web_module.gif");
+        registerImage(reg, WEBSERVICE_IMG, "icons/obj16/webservice.png");
+        registerImage(reg, RESOURCES_IMG, "icons/obj16/resources.gif");
+        registerImage(reg, GF_WIZARD, "icons/wizard75x66.png");
+    }
+
+    private void registerImage(ImageRegistry reg, String key, String path) {
+        java.net.URL url = getBundle().getEntry(path);
+        if (url != null) {
+            reg.put(key, createFromURL(url));
+        }
+    }
 
 
     	/**
