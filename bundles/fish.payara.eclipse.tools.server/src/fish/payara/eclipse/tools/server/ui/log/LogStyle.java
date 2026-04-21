@@ -37,7 +37,6 @@ import org.eclipse.ui.PlatformUI;
 import fish.payara.eclipse.tools.server.PayaraServerPlugin;
 
 public class LogStyle implements LineStyleListener, IPropertyChangeListener {
-    Display display = Display.getCurrent();
 
     IPreferenceStore store = PayaraServerPlugin.getInstance().getPreferenceStore();
     boolean colorInConsole = store.getBoolean(ENABLE_COLORS_CONSOLE);
@@ -50,24 +49,31 @@ public class LogStyle implements LineStyleListener, IPropertyChangeListener {
 
     @Override
     public void lineGetStyle(LineStyleEvent event) {
+        if (event.lineText == null) {
+            return;
+        }
         StyleRange styleRange = null;
         String buf = event.lineText;
         int start;
 
         if (colorInConsole) {
+            Display display = Display.getDefault();
+            if (display == null || display.isDisposed()) {
+                return;
+            }
             if ((start = buf.indexOf(Level.WARNING.getName())) != -1) {
                 styleRange = new StyleRange();
                 styleRange.start = event.lineOffset + start;
-                styleRange.length = 6;
+                styleRange.length = Level.WARNING.getName().length();
                 styleRange.foreground = display.getSystemColor(SWT.COLOR_DARK_YELLOW);
             } else if ((start = buf.indexOf(Level.SEVERE.getName())) != -1) {
-                // Makr severe error and exception stack trace as error color
+                // Mark severe error and exception stack trace as error color
                 styleRange = new StyleRange();
                 String errorColorName = org.eclipse.jface.preference.JFacePreferences.ERROR_COLOR;
                 styleRange.foreground = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
                         .get(errorColorName);
                 styleRange.start = event.lineOffset + start;
-                styleRange.length = 5;
+                styleRange.length = Level.SEVERE.getName().length();
                 styleRange.fontStyle = SWT.BOLD;
             } else if ((start = buf.indexOf("FATAL")) != -1) {
                 styleRange = new StyleRange();
@@ -75,7 +81,7 @@ public class LogStyle implements LineStyleListener, IPropertyChangeListener {
                 styleRange.foreground = PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getColorRegistry()
                         .get(errorColorName);
                 styleRange.start = event.lineOffset + start;
-                styleRange.length = 4;
+                styleRange.length = "FATAL".length();
                 styleRange.fontStyle = SWT.BOLD;
             }
 
