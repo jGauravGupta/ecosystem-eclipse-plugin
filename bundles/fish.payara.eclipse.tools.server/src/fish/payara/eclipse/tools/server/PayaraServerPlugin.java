@@ -113,12 +113,15 @@ public class PayaraServerPlugin extends AbstractUIPlugin {
             return ImageDescriptor.getMissingImageDescriptor();
         }
 
+        ImageData imageData;
         try (InputStream input = imageUrl.openStream()) {
-            return ImageDescriptor.createFromImageData(new ImageData(input));
+            imageData = new ImageData(input);
         } catch (IOException | SWTException | IllegalArgumentException e) {
             logError("Unable to load image resource: " + path, e);
             return ImageDescriptor.getMissingImageDescriptor();
         }
+
+        return ImageDescriptor.createFromImageData(imageData);
     }
 
 
