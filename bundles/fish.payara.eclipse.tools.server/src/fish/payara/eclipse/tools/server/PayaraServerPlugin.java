@@ -25,6 +25,7 @@ import static org.eclipse.core.runtime.IStatus.ERROR;
 import static org.eclipse.core.runtime.IStatus.INFO;
 import static org.eclipse.wst.server.core.ServerCore.addRuntimeLifecycleListener;
 
+import java.io.ByteArrayInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -113,15 +114,13 @@ public class PayaraServerPlugin extends AbstractUIPlugin {
             return ImageDescriptor.getMissingImageDescriptor();
         }
 
-        ImageData imageData;
         try (InputStream input = imageUrl.openStream()) {
-            imageData = new ImageData(input);
+            byte[] imageBytes = input.readAllBytes();
+            return ImageDescriptor.createFromImageData(new ImageData(new ByteArrayInputStream(imageBytes)));
         } catch (IOException | SWTException | IllegalArgumentException e) {
             logError("Unable to load image resource: " + path, e);
             return ImageDescriptor.getMissingImageDescriptor();
         }
-
-        return ImageDescriptor.createFromImageData(imageData);
     }
 
 
