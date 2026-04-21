@@ -23,10 +23,11 @@ import static java.lang.Runtime.getRuntime;
 import static java.nio.charset.Charset.defaultCharset;
 import static org.eclipse.core.runtime.IStatus.ERROR;
 import static org.eclipse.core.runtime.IStatus.INFO;
-import static org.eclipse.jface.resource.ImageDescriptor.createFromURL;
 import static org.eclipse.wst.server.core.ServerCore.addRuntimeLifecycleListener;
 
 import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -39,7 +40,9 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.swt.SWTException;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.wst.server.core.IRuntime;
 import org.eclipse.wst.server.core.internal.ResourceManager;
@@ -89,15 +92,34 @@ public class PayaraServerPlugin extends AbstractUIPlugin {
     @Override
     protected void initializeImageRegistry(ImageRegistry reg) {
         super.initializeImageRegistry(reg);
-        reg.put(GF_SERVER_IMG, createFromURL(getBundle().getEntry("icons/obj16/payara-blue.png")));
-        reg.put(EAR_MODULE_IMG, createFromURL(getBundle().getEntry("icons/obj16/ear.gif")));
-        reg.put(EJB_MODULE_IMG, createFromURL(getBundle().getEntry("icons/obj16/ejb_module.gif")));
-        reg.put(LOG_FILE_IMG, createFromURL(getBundle().getEntry("icons/obj16/logfile.png")));
-        reg.put(WEB_MODULE_IMG, createFromURL(getBundle().getEntry("icons/obj16/web_module.gif")));
-        reg.put(WEBSERVICE_IMG, createFromURL(getBundle().getEntry("icons/obj16/webservice.png")));
-        reg.put(RESOURCES_IMG, createFromURL(getBundle().getEntry("icons/obj16/resources.gif")));
-        reg.put(GF_WIZARD, createFromURL(getBundle().getEntry("icons/wizard75x66.png")));
+        reg.put(GF_SERVER_IMG, createImageDescriptor("icons/obj16/payara-blue.png"));
+        reg.put(EAR_MODULE_IMG, createImageDescriptor("icons/obj16/ear.gif"));
+        reg.put(EJB_MODULE_IMG, createImageDescriptor("icons/obj16/ejb_module.gif"));
+        reg.put(LOG_FILE_IMG, createImageDescriptor("icons/obj16/logfile.png"));
+        reg.put(WEB_MODULE_IMG, createImageDescriptor("icons/obj16/web_module.gif"));
+        reg.put(WEBSERVICE_IMG, createImageDescriptor("icons/obj16/webservice.png"));
+        reg.put(RESOURCES_IMG, createImageDescriptor("icons/obj16/resources.gif"));
+        reg.put(GF_WIZARD, createImageDescriptor("icons/wizard75x66.png"));
 	}
+
+    public static ImageDescriptor createImageDescriptor(String path) {
+        if (BUNDLE == null) {
+            return ImageDescriptor.getMissingImageDescriptor();
+        }
+
+        var imageUrl = BUNDLE.getEntry(path);
+        if (imageUrl == null) {
+            logError("Unable to locate image resource: " + path);
+            return ImageDescriptor.getMissingImageDescriptor();
+        }
+
+        try (InputStream input = imageUrl.openStream()) {
+            return ImageDescriptor.createFromImageData(new ImageData(input));
+        } catch (IOException | SWTException | IllegalArgumentException e) {
+            logError("Unable to load image resource: " + path, e);
+            return ImageDescriptor.getMissingImageDescriptor();
+        }
+    }
 
 
     	/**
