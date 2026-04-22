@@ -119,12 +119,12 @@
         <supported>
             <runtime-component id="payara.runtime" version="5"/>
             <facet id="glassfish.web" version="5.0]"/>
-            <facet id="glassfish.ejb" version="4.0]"/>
+            <facet id="glassfish.ejb" version="5.0]"/>
             <facet id="jst.web" version="5.0]"/>
-            <facet id="jst.ejb" version="4.0]"/>
-            <facet id="jst.ear" version="9.0]"/>
-            <facet id="jst.connector" version="2.0]"/>
-            <facet id="jst.appclient" version="9.0]"/>
+            <facet id="jst.ejb" version="3.2]"/>
+            <facet id="jst.ear" version="8.0]"/>
+            <facet id="jst.connector" version="1.7]"/>
+            <facet id="jst.appclient" version="8.0]"/>
             <facet id="jst.utility" version="1.0"/> 
             <facet id="jst.webfragment" version="5.0]" />
         </supported>
@@ -132,7 +132,7 @@
         <supported>
             <runtime-component id="payara.runtime" version="6"/>
             <facet id="glassfish.web" version="6.0]"/>
-            <facet id="glassfish.ejb" version="4.0]"/>
+            <facet id="glassfish.ejb" version="6.0]"/>
             <facet id="jst.web" version="6.0]"/>
             <facet id="jst.ejb" version="4.0]"/>
             <facet id="jst.ear" version="10.0]"/>
@@ -144,15 +144,15 @@
 
         <supported>
             <runtime-component id="payara.runtime" version="7"/>
-            <facet id="glassfish.web" version="6.1]"/>
-            <facet id="glassfish.ejb" version="4.1]"/>
-            <facet id="jst.web" version="6.1]"/>
-            <facet id="jst.ejb" version="4.1]"/>
+            <facet id="glassfish.web" version="7.0]"/>
+            <facet id="glassfish.ejb" version="7.0]"/>
+            <facet id="jst.web" version="7.0]"/>
+            <facet id="jst.ejb" version="4.0]"/>
             <facet id="jst.ear" version="11.0]"/>
             <facet id="jst.connector" version="2.1]"/>
             <facet id="jst.appclient" version="11.0]"/>
             <facet id="jst.utility" version="1.0"/>
-            <facet id="jst.webfragment" version="6.1]" />
+            <facet id="jst.webfragment" version="7.0]" />
         </supported>
     </extension>
     
@@ -330,7 +330,7 @@
                 <runtime-component id="payara.runtime" version="5"/>
                 <fixed-facet id="jst.ejb"/>
             </context>
-            <facet id="glassfish.ejb" version="4.0" />
+            <facet id="glassfish.ejb" version="5.0" />
         </default-facets>
 
         <default-facets>
@@ -346,7 +346,7 @@
                 <runtime-component id="payara.runtime" version="6"/>
                 <fixed-facet id="jst.ejb"/>
             </context>
-            <facet id="glassfish.ejb" version="4.0" />
+            <facet id="glassfish.ejb" version="6.0" />
         </default-facets>
 
         <default-facets>
@@ -354,7 +354,7 @@
                 <runtime-component id="payara.runtime" version="7"/>
                 <fixed-facet id="jst.web"/>
             </context>
-            <facet id="glassfish.web" version="6.1" />
+            <facet id="glassfish.web" version="7.0" />
         </default-facets>
 
         <default-facets>
@@ -362,7 +362,7 @@
                 <runtime-component id="payara.runtime" version="7"/>
                 <fixed-facet id="jst.ejb"/>
             </context>
-            <facet id="glassfish.ejb" version="4.1" />
+            <facet id="glassfish.ejb" version="7.0" />
         </default-facets>
     </extension>
 
