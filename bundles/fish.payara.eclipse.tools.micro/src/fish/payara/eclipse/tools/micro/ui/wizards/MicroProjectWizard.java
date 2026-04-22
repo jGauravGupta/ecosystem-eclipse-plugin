@@ -64,6 +64,7 @@ import org.xml.sax.InputSource;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.XMLConstants;
 
 public class MicroProjectWizard extends Wizard implements INewWizard {
 
@@ -88,7 +89,7 @@ public class MicroProjectWizard extends Wizard implements INewWizard {
 
 	public static final String ARCHETYPE_GROUP_ID = "fish.payara.maven.archetypes"; //$NON-NLS-1$
 	public static final String ARCHETYPE_ARTIFACT_ID = "payara-micro-maven-archetype"; //$NON-NLS-1$
-	public static final String ARCHETYPE_VERSION_4X = "1.5.0"; //$NON-NLS-1$
+	public static final String ARCHETYPE_VERSION_5X = "1.5.0"; //$NON-NLS-1$
 	public static final String STARTER_ARCHETYPE_GROUP_ID = "fish.payara.starter";
 	public static final String STARTER_ARCHETYPE_ARTIFACT_ID = "payara-starter-archetype";
 	public static final String STARTER_ARCHETYPE_VERSION = "2.2.1"; //$NON-NLS-1$
@@ -156,6 +157,14 @@ public class MicroProjectWizard extends Wizard implements INewWizard {
 
 			// Parse the XML response
 			DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+			factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+			factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true); //$NON-NLS-1$
+			factory.setFeature("http://xml.org/sax/features/external-general-entities", false); //$NON-NLS-1$
+			factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false); //$NON-NLS-1$
+			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, EMPTY);
+			factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, EMPTY);
+			factory.setXIncludeAware(false);
+			factory.setExpandEntityReferences(false);
 			DocumentBuilder builder = factory.newDocumentBuilder();
 			Document doc = builder.parse(new InputSource(new StringReader(xmlResponse.toString())));
 
@@ -230,6 +239,7 @@ public class MicroProjectWizard extends Wizard implements INewWizard {
 	@Override
 	public boolean performFinish() {
 		Archetype archetype = microSettingsPage.getArchetype();
+		microSettingsPage.configureBuildTool();
 		final String groupId = projectSettingsPage.getGroupId();
 		final String artifactId = projectSettingsPage.getArtifactId();
 		final String version = projectSettingsPage.getVersion();

@@ -15,7 +15,7 @@ import static fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard.ARCH
 import static fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard.ARCHETYPE_MICRO_VERSION;
 import static fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard.ARCHETYPE_PAYARA_VERSION;
 import static fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard.ARCHETYPE_PLATFORM;
-import static fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard.ARCHETYPE_VERSION_4X;
+import static fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard.ARCHETYPE_VERSION_5X;
 import static fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard.ARCHETYPE_GROUP_ID;
 import static fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard.ARCHETYPE_ARTIFACT_ID;
 import static fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard.PLATFORM_MICRO;
@@ -164,23 +164,21 @@ public class MicroSettingsWizardPage extends AbstractMavenWizardPage {
 	}
 
 	public Archetype getArchetype() {
-		String payaraVersion = microVersionCombo.getText().trim();
-		if (usesLegacyMicroArchetype(getSelectedPlatform(), payaraVersion)) {
+		if (isLegacyMicroProject()) {
 			archetype.setGroupId(ARCHETYPE_GROUP_ID);
 			archetype.setArtifactId(ARCHETYPE_ARTIFACT_ID);
-			archetype.setVersion(ARCHETYPE_VERSION_4X);
-			MavenBuildTool.setStartCommand("start");
+			archetype.setVersion(ARCHETYPE_VERSION_5X);
 		} else {
 			archetype.setGroupId(STARTER_ARCHETYPE_GROUP_ID);
 			archetype.setArtifactId(STARTER_ARCHETYPE_ARTIFACT_ID);
 			archetype.setVersion(STARTER_ARCHETYPE_VERSION);
-			MavenBuildTool.setStartCommand("dev");
 		}
 
 		return archetype;
 	}
 
 	public Map<String, String> getProperties() {
+		boolean legacyMicroProject = isLegacyMicroProject();
 		Map<String, String> properties = archetype.getProperties()
 				.entrySet()
 				.stream()
@@ -193,12 +191,23 @@ public class MicroSettingsWizardPage extends AbstractMavenWizardPage {
 		} catch (UnsupportedEncodingException ex) {
 			throw new IllegalStateException("Invalid context root value " + contextRoot);
 		}
-		properties.put(ARCHETYPE_PLATFORM, getSelectedPlatform());
-		properties.put(ARCHETYPE_MICRO_VERSION, microVersionCombo.getText());
-		properties.put(ARCHETYPE_PAYARA_VERSION, microVersionCombo.getText());
-		properties.put(ARCHETYPE_JAVA_VERSION, properties.getOrDefault(ARCHETYPE_JAVA_VERSION, "17"));
+		if (legacyMicroProject) {
+			properties.put(ARCHETYPE_MICRO_VERSION, microVersionCombo.getText());
+			properties.remove(ARCHETYPE_PLATFORM);
+			properties.remove(ARCHETYPE_PAYARA_VERSION);
+			properties.remove(ARCHETYPE_JAVA_VERSION);
+		} else {
+			properties.put(ARCHETYPE_PLATFORM, getSelectedPlatform());
+			properties.put(ARCHETYPE_PAYARA_VERSION, microVersionCombo.getText());
+			properties.put(ARCHETYPE_JAVA_VERSION, properties.getOrDefault(ARCHETYPE_JAVA_VERSION, "17"));
+			properties.remove(ARCHETYPE_MICRO_VERSION);
+		}
 		properties.put(ARCHETYPE_AUTOBIND_HTTP, String.valueOf(autobindCheckbox.getSelection()));
 		return properties;
+	}
+
+	void configureBuildTool() {
+		MavenBuildTool.setStartCommand(isLegacyMicroProject() ? "start" : "dev");
 	}
 
 	private void selectPlatform(String platform) {
@@ -225,8 +234,12 @@ public class MicroSettingsWizardPage extends AbstractMavenWizardPage {
 		}
 	}
 
+	private boolean isLegacyMicroProject() {
+		return usesLegacyMicroArchetype(getSelectedPlatform(), microVersionCombo.getText().trim());
+	}
+
 	private boolean usesLegacyMicroArchetype(String platform, String version) {
-		return PLATFORM_MICRO.equals(platform) && extractMajorVersion(version) < 5;
+		return PLATFORM_MICRO.equals(platform) && extractMajorVersion(version) < 6;
 	}
 
 	private int extractMajorVersion(String version) {
