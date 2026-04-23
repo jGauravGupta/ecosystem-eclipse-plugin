@@ -2,6 +2,18 @@
 <?eclipse version="3.4"?>
 <plugin>
 
+    <extension point="org.eclipse.ui.decorators">
+        <decorator
+            adaptable="true"
+            class="fish.payara.eclipse.tools.server.ui.PayaraServerProjectDecorator"
+            id="fish.payara.eclipse.tools.server.ui.payaraServerProjectDecorator"
+            label="%payara.server.project.decorator"
+            lightweight="false"
+            objectClass="org.eclipse.core.resources.IProject"
+            state="true">
+        </decorator>
+    </extension>
+
     <extension point="org.eclipse.wst.server.core.serverTypes">
         <serverType
             id="payara.server"
