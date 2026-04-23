@@ -229,13 +229,10 @@ public class MicroProjectTab extends AbstractJavaMainTab {
 				config.setAttribute(ATTR_PROJECT_NAME, projectName);
 				config.setAttribute(ATTR_WORKING_DIRECTORY, project.getLocation().toOSString());
 				config.setAttribute(ATTR_BUILD_SCOPE, "${projects:" + project.getName() + "}");
-				Map<String, String> env = config.getAttribute(ATTR_ENVIRONMENT_VARIABLES, Collections.emptyMap());
-				if (env.isEmpty()) {
-					config.setAttribute(ATTR_ENVIRONMENT_VARIABLES, env = new HashMap<>());
-				}
-				if (!env.containsKey(JAVA_HOME_ENV_VAR)) {
-					env.put(JAVA_HOME_ENV_VAR, getJavaHome(project));
-				}
+				Map<String, String> env = new HashMap<>(
+						config.getAttribute(ATTR_ENVIRONMENT_VARIABLES, Collections.emptyMap()));
+				env.put(JAVA_HOME_ENV_VAR, getJavaHome(project));
+				config.setAttribute(ATTR_ENVIRONMENT_VARIABLES, env);
 				config.setAttribute(ATTR_LOCATION, buildTool.getExecutableHome());
 				boolean hotDeploy = HOT_DEPLOY_ARTIFACT.equals(reloadArtifactCombo.getText());
 				List<String> startCmd = buildTool.getStartCommand(contextPathText.getText(), microVersionText.getText(),
