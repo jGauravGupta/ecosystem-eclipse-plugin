@@ -15,17 +15,26 @@ import static fish.payara.eclipse.tools.micro.MicroConstants.WAR_BUILD_ARTIFACT;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Platform;
 
 public class MavenBuildTool extends BuildTool {
 
 	public static String START_COMMAND = "dev";
-	private static final String PLUGIN = " fish.payara.maven.plugins:payara-micro-maven-plugin:";
+	private static final String POM_XML = "pom.xml";
+	private static final String MICRO_PLUGIN = "<artifactId>payara-micro-maven-plugin</artifactId>";
+	private static final String SERVER_PLUGIN = "<artifactId>payara-server-maven-plugin</artifactId>";
+	private static final String MICRO_GOAL_PREFIX = "payara-micro";
+	private static final String SERVER_GOAL_PREFIX = "payara-server";
 
 	public MavenBuildTool(IProject project) {
 		super(project);
@@ -72,25 +81,17 @@ public class MavenBuildTool extends BuildTool {
 			boolean hotDeploy) {
 
 		List<String> commands = new ArrayList<>();
-		if (WAR_BUILD_ARTIFACT.equals(buildType)) {
-			commands.add("resources:resources");
-			commands.add("compiler:compile");
-			commands.add("war:war");
+		commands.add("install");
+		commands.add(getGoalPrefix() + ':' + START_COMMAND);
+		if (WAR_BUILD_ARTIFACT.equals(buildType) || EXPLODED_WAR_BUILD_ARTIFACT.equals(buildType)) {
 			commands.add("-DdeployWar=true");
-		} else if (EXPLODED_WAR_BUILD_ARTIFACT.equals(buildType)) {
-			commands.add("resources:resources");
-			commands.add("compiler:compile");
-			commands.add("war:exploded");
-			commands.add("-DdeployWar=true");
-			commands.add("-Dexploded=true");
-		} else if (UBER_JAR_BUILD_ARTIFACT.equals(buildType)) {
-			commands.add("package");
-			commands.add(PLUGIN + "bundle");
-			commands.add("-DuseUberJar=true");
-		} else {
-			commands.add("package");
 		}
-		commands.add(PLUGIN + START_COMMAND);
+		if (EXPLODED_WAR_BUILD_ARTIFACT.equals(buildType)) {
+			commands.add("-Dexploded=true");
+		}
+		if (UBER_JAR_BUILD_ARTIFACT.equals(buildType)) {
+			commands.add("-DuseUberJar=true");
+		}
 		if (contextPath != null && !contextPath.trim().isEmpty()) {
 			commands.add("-DcontextRoot=" + contextPath);
 		}
@@ -110,7 +111,7 @@ public class MavenBuildTool extends BuildTool {
 		commands.add("resources:resources");
 		commands.add("compiler:compile");
 		commands.add("war:exploded");
-		commands.add("payara-micro:reload");
+		commands.add(getGoalPrefix() + ":reload");
 
 		if (hotDeploy) {
 			commands.add("-DhotDeploy=true");
@@ -126,5 +127,28 @@ public class MavenBuildTool extends BuildTool {
 
 	public static void setStartCommand(String cmd) {
 		START_COMMAND = cmd;
+	}
+
+	private String getGoalPrefix() {
+		String pom = readPomContents();
+		if (pom.contains(SERVER_PLUGIN)) {
+			return SERVER_GOAL_PREFIX;
+		}
+		if (pom.contains(MICRO_PLUGIN)) {
+			return MICRO_GOAL_PREFIX;
+		}
+		return MICRO_GOAL_PREFIX;
+	}
+
+	private String readPomContents() {
+		IFile pomFile = project.getFile(POM_XML);
+		if (!pomFile.exists()) {
+			return "";
+		}
+		try (InputStream inputStream = pomFile.getContents()) {
+			return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+		} catch (IOException | CoreException ex) {
+			return "";
+		}
 	}
 }

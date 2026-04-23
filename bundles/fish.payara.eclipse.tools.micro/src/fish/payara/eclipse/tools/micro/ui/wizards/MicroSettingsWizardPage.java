@@ -207,7 +207,7 @@ public class MicroSettingsWizardPage extends AbstractMavenWizardPage {
 	}
 
 	void configureBuildTool() {
-		MavenBuildTool.setStartCommand(isLegacyMicroProject() ? "start" : "dev");
+		MavenBuildTool.setStartCommand("dev");
 	}
 
 	private void selectPlatform(String platform) {
