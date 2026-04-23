@@ -55,4 +55,17 @@
         </launchConfigurationTypeImage>
     </extension>
 
+    <extension
+        point="org.eclipse.ui.decorators">
+        <decorator
+            adaptable="true"
+            class="fish.payara.eclipse.tools.micro.ui.PayaraMicroProjectDecorator"
+            id="fish.payara.eclipse.tools.micro.ui.payaraMicroProjectDecorator"
+            label="%payara.micro.project.decorator"
+            lightweight="false"
+            objectClass="org.eclipse.core.resources.IProject"
+            state="true">
+        </decorator>
+    </extension>
+
 </plugin>
