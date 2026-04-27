@@ -10,7 +10,9 @@
 package fish.payara.eclipse.tools.micro;
 
 import static fish.payara.eclipse.tools.micro.MicroConstants.JAVA_HOME_ENV_VAR;
+import static fish.payara.eclipse.tools.micro.MicroConstants.PAYARA_JAVA_HOME_ENV_VAR;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +37,9 @@ public final class JavaEnvironmentProperty {
 	public static Map<String, String> withProjectJavaHome(Map<String, String> environment, IProject project)
 			throws CoreException {
 		Map<String, String> updatedEnvironment = new HashMap<>(environment);
-		updatedEnvironment.put(JAVA_HOME_ENV_VAR, getJavaHome(project));
+		String javaHome = getJavaHome(project);
+		updatedEnvironment.put(JAVA_HOME_ENV_VAR, javaHome);
+		updatedEnvironment.put(PAYARA_JAVA_HOME_ENV_VAR, getJavaExecutablePath(javaHome));
 		return updatedEnvironment;
 	}
 
@@ -98,5 +102,13 @@ public final class JavaEnvironmentProperty {
 			return compatibleVms[0];
 		}
 		return null;
+	}
+
+	private static String getJavaExecutablePath(String javaHome) {
+		String executable = "java";
+		if (System.getProperty("os.name").toLowerCase().contains("win")) {
+			executable = "java.exe";
+		}
+		return javaHome + File.separatorChar + "bin" + File.separatorChar + executable;
 	}
 }

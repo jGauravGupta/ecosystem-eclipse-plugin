@@ -22,6 +22,7 @@ public interface MicroConstants {
 	String ATTR_PORT = "port";
 
 	String JAVA_HOME_ENV_VAR = "JAVA_HOME";
+	String PAYARA_JAVA_HOME_ENV_VAR = "PAYARA_JAVA_HOME";
 
 	String ATTR_CONTEXT_PATH = "contextPath";
 	String ATTR_MICRO_VERSION = "microVersion";
