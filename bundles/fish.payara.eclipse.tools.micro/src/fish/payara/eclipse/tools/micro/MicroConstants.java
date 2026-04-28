@@ -21,6 +21,8 @@ public interface MicroConstants {
 	String ATTR_HOST_NAME = "hostname";
 	String ATTR_PORT = "port";
 
+	String LAUNCH_CONFIG_TYPE = "fish.payara.eclipse.tools.micro.launchConfigurationType";
+
 	String JAVA_HOME_ENV_VAR = "JAVA_HOME";
 	String PAYARA_JAVA_HOME_ENV_VAR = "PAYARA_JAVA_HOME";
 
