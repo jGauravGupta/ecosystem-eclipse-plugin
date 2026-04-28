@@ -31,6 +31,8 @@ import org.eclipse.jdt.launching.environments.IExecutionEnvironmentsManager;
 
 public final class JavaEnvironmentProperty {
 
+	private static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().contains("win");
+
 	private JavaEnvironmentProperty() {
 	}
 
@@ -105,10 +107,7 @@ public final class JavaEnvironmentProperty {
 	}
 
 	private static String getJavaExecutablePath(String javaHome) {
-		String executable = "java";
-		if (System.getProperty("os.name").toLowerCase().contains("win")) {
-			executable = "java.exe";
-		}
+		String executable = IS_WINDOWS ? "java.exe" : "java";
 		return javaHome + File.separatorChar + "bin" + File.separatorChar + executable;
 	}
 }

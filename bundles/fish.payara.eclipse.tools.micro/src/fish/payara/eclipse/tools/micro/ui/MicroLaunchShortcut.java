@@ -22,6 +22,7 @@ import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_P
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -167,7 +168,7 @@ public class MicroLaunchShortcut implements ILaunchShortcut2 {
 		wc.setAttribute(ATTR_DEBUG_PORT, debugPort);
 		wc.setAttribute(DebugPlugin.ATTR_PROCESS_FACTORY_ID, "fish.payara.eclipse.tools.micro.processFactory");
 		wc.setAttribute(ATTR_ENVIRONMENT_VARIABLES,
-				JavaEnvironmentProperty.withProjectJavaHome(java.util.Map.of(), project));
+				JavaEnvironmentProperty.withProjectJavaHome(Map.of(), project));
 		return wc.doSave();
 	}
 
