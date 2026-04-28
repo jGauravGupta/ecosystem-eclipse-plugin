@@ -41,6 +41,7 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -63,6 +64,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 
 import fish.payara.eclipse.tools.micro.BuildTool;
+import fish.payara.eclipse.tools.micro.MicroConstants;
 import fish.payara.eclipse.tools.micro.ui.wizards.Messages;
 
 public class MicroProjectTab extends AbstractJavaMainTab {
@@ -229,13 +231,9 @@ public class MicroProjectTab extends AbstractJavaMainTab {
 				config.setAttribute(ATTR_PROJECT_NAME, projectName);
 				config.setAttribute(ATTR_WORKING_DIRECTORY, project.getLocation().toOSString());
 				config.setAttribute(ATTR_BUILD_SCOPE, "${projects:" + project.getName() + "}");
-				Map<String, String> env = config.getAttribute(ATTR_ENVIRONMENT_VARIABLES, Collections.emptyMap());
-				if (env.isEmpty()) {
-					config.setAttribute(ATTR_ENVIRONMENT_VARIABLES, env = new HashMap<>());
-				}
-				if (!env.containsKey(JAVA_HOME_ENV_VAR)) {
-					env.put(JAVA_HOME_ENV_VAR, getJavaHome(project));
-				}
+				Map<String, String> env = new HashMap<>(config.getAttribute(ATTR_ENVIRONMENT_VARIABLES, Collections.emptyMap()));
+				env.put(JAVA_HOME_ENV_VAR, getJavaHome(project));
+				config.setAttribute(ATTR_ENVIRONMENT_VARIABLES, env);
 				config.setAttribute(ATTR_LOCATION, buildTool.getExecutableHome());
 				boolean hotDeploy = HOT_DEPLOY_ARTIFACT.equals(reloadArtifactCombo.getText());
 				List<String> startCmd = buildTool.getStartCommand(contextPathText.getText(), microVersionText.getText(),
@@ -252,6 +250,13 @@ public class MicroProjectTab extends AbstractJavaMainTab {
 	public static String getJavaHome(IProject project) throws CoreException {
 		IJavaProject javaProject = JavaCore.create(project);
 		IVMInstall install = JavaRuntime.getVMInstall(javaProject);
+		if (install == null) {
+			install = JavaRuntime.getDefaultVMInstall();
+		}
+		if (install == null || install.getInstallLocation() == null) {
+			throw new CoreException(new Status(IStatus.ERROR, MicroConstants.PLUGIN_ID,
+					"No JVM installation found for the project."));
+		}
 		return install.getInstallLocation().getAbsolutePath();
 	}
 
