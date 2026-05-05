@@ -12,6 +12,7 @@ package fish.payara.eclipse.tools.micro.ui;
 import static fish.payara.eclipse.tools.micro.MicroConstants.ATTR_BUILD_ARTIFACT;
 import static fish.payara.eclipse.tools.micro.MicroConstants.ATTR_CONTEXT_PATH;
 import static fish.payara.eclipse.tools.micro.MicroConstants.ATTR_DEBUG_PORT;
+import static fish.payara.eclipse.tools.micro.MicroConstants.ATTR_JDK_PATH;
 import static fish.payara.eclipse.tools.micro.MicroConstants.ATTR_MICRO_VERSION;
 import static fish.payara.eclipse.tools.micro.MicroConstants.ATTR_RELOAD_ARTIFACT;
 import static fish.payara.eclipse.tools.micro.MicroConstants.AUTO_DEPLOY_ARTIFACT;
@@ -33,6 +34,11 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.DirectoryDialog;
 
 import fish.payara.eclipse.tools.micro.ui.wizards.MicroProjectWizard;
 import org.eclipse.core.resources.IProject;
@@ -67,7 +73,7 @@ import fish.payara.eclipse.tools.micro.ui.wizards.Messages;
 
 public class MicroProjectTab extends AbstractJavaMainTab {
 
-	private Text contextPathText, debugPortText;
+	private Text contextPathText, debugPortText, jdkPathText;
 	private Combo microVersionText, buildArtifactCombo, reloadArtifactCombo;
 
 	@Override
@@ -101,6 +107,27 @@ public class MicroProjectTab extends AbstractJavaMainTab {
 				new String[] { EMPTY_STRING, AUTO_DEPLOY_ARTIFACT, HOT_DEPLOY_ARTIFACT });
 		reloadArtifactCombo.addModifyListener(getDefaultListener());
 		reloadArtifactCombo.setToolTipText(Messages.reloadArtifactComponentTooltip);
+
+		group = SWTFactory.createGroup(mainComposite, Messages.jdkPathComponentLabel, 2, 1,
+				GridData.FILL_HORIZONTAL);
+		jdkPathText = SWTFactory.createSingleText(group, 1);
+		jdkPathText.addModifyListener(getDefaultListener());
+		Button jdkBrowseButton = SWTFactory.createPushButton(group, "Browse...", null);
+		jdkBrowseButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				DirectoryDialog dialog = new DirectoryDialog(getShell());
+				dialog.setMessage("Select JDK installation directory");
+				String current = jdkPathText.getText().trim();
+				if (!current.isEmpty()) {
+					dialog.setFilterPath(current);
+				}
+				String selected = dialog.open();
+				if (selected != null) {
+					jdkPathText.setText(selected);
+				}
+			}
+		});
 
 		setControl(mainComposite);
 	}
@@ -151,6 +178,14 @@ public class MicroProjectTab extends AbstractJavaMainTab {
 			setErrorMessage(ce.getStatus().getMessage());
 		}
 		reloadArtifactCombo.setText(reloadType);
+
+		String jdkPath = EMPTY_STRING;
+		try {
+			jdkPath = config.getAttribute(ATTR_JDK_PATH, jdkPath);
+		} catch (CoreException ce) {
+			setErrorMessage(ce.getStatus().getMessage());
+		}
+		jdkPathText.setText(jdkPath);
 	}
 
 	public Image getImage() {
@@ -221,11 +256,13 @@ public class MicroProjectTab extends AbstractJavaMainTab {
 				if (debugPort.isEmpty()) {
 					debugPort = String.valueOf(DEFAULT_DEBUG_PORT);
 				}
+				String jdkPath = jdkPathText.getText().trim();
 				config.setAttribute(ATTR_CONTEXT_PATH, contextPathText.getText());
 				config.setAttribute(ATTR_MICRO_VERSION, microVersionText.getText());
 				config.setAttribute(ATTR_BUILD_ARTIFACT, buildArtifactCombo.getText());
 				config.setAttribute(ATTR_DEBUG_PORT, debugPort);
 				config.setAttribute(ATTR_RELOAD_ARTIFACT, reloadArtifactCombo.getText());
+				config.setAttribute(ATTR_JDK_PATH, jdkPath);
 				config.setAttribute(ATTR_PROJECT_NAME, projectName);
 				config.setAttribute(ATTR_WORKING_DIRECTORY, project.getLocation().toOSString());
 				config.setAttribute(ATTR_BUILD_SCOPE, "${projects:" + project.getName() + "}");
@@ -233,7 +270,9 @@ public class MicroProjectTab extends AbstractJavaMainTab {
 				if (env.isEmpty()) {
 					config.setAttribute(ATTR_ENVIRONMENT_VARIABLES, env = new HashMap<>());
 				}
-				if (!env.containsKey(JAVA_HOME_ENV_VAR)) {
+				if (!jdkPath.isEmpty()) {
+					env.put(JAVA_HOME_ENV_VAR, jdkPath);
+				} else if (!env.containsKey(JAVA_HOME_ENV_VAR)) {
 					env.put(JAVA_HOME_ENV_VAR, getJavaHome(project));
 				}
 				config.setAttribute(ATTR_LOCATION, buildTool.getExecutableHome());

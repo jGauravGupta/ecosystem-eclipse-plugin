@@ -28,6 +28,7 @@ public interface MicroConstants {
 	String ATTR_BUILD_ARTIFACT = "buildArtifact";
 	String ATTR_DEBUG_PORT = "debugPort";
 	String ATTR_RELOAD_ARTIFACT = "reloadArtifact";
+	String ATTR_JDK_PATH = "jdkPath";
 
 	String WAR_BUILD_ARTIFACT = "War";
 	String EXPLODED_WAR_BUILD_ARTIFACT = "Exploded War";
