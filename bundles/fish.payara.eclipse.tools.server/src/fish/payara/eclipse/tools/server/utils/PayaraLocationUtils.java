@@ -223,10 +223,10 @@ public final class PayaraLocationUtils {
 			properties.load(fis);
 			int major = Integer.parseInt(properties.getProperty("major_version"));
 			int minor = Integer.parseInt(properties.getProperty("minor_version"));
-            String updateRaw = properties.getProperty("update_version");
+            String updateRaw = properties.getProperty("update_version", "0");
             // Extract leading digits from values like "0-SNAPSHOT" or "1.Alpha3"
-            String updateDigits = updateRaw.replaceFirst("^(\\d+).*", "$1");
-            int update = Integer.parseInt(updateDigits);
+            Matcher updateMatcher = Pattern.compile("^(\\d+)").matcher(updateRaw);
+            int update = updateMatcher.find() ? Integer.parseInt(updateMatcher.group(1)) : 0;
 			return new Version(major + "." + minor + "." + update);
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
