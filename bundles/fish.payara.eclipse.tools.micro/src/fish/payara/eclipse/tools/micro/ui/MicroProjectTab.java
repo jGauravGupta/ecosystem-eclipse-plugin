@@ -18,7 +18,6 @@ import static fish.payara.eclipse.tools.micro.MicroConstants.AUTO_DEPLOY_ARTIFAC
 import static fish.payara.eclipse.tools.micro.MicroConstants.DEFAULT_DEBUG_PORT;
 import static fish.payara.eclipse.tools.micro.MicroConstants.EXPLODED_WAR_BUILD_ARTIFACT;
 import static fish.payara.eclipse.tools.micro.MicroConstants.HOT_DEPLOY_ARTIFACT;
-import static fish.payara.eclipse.tools.micro.MicroConstants.JAVA_HOME_ENV_VAR;
 import static fish.payara.eclipse.tools.micro.MicroConstants.UBER_JAR_BUILD_ARTIFACT;
 import static fish.payara.eclipse.tools.micro.MicroConstants.WAR_BUILD_ARTIFACT;
 import static org.eclipse.core.externaltools.internal.IExternalToolConstants.ATTR_BUILD_SCOPE;
@@ -29,8 +28,6 @@ import static org.eclipse.debug.core.ILaunchManager.ATTR_ENVIRONMENT_VARIABLES;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME;
 
 import java.io.FileNotFoundException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -46,12 +43,8 @@ import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.internal.ui.SWTFactory;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.debug.ui.launcher.AbstractJavaMainTab;
 import org.eclipse.jdt.internal.debug.ui.launcher.LauncherMessages;
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.m2e.core.ui.internal.MavenImages;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
@@ -63,6 +56,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Text;
 
 import fish.payara.eclipse.tools.micro.BuildTool;
+import fish.payara.eclipse.tools.micro.JavaEnvironmentProperty;
 import fish.payara.eclipse.tools.micro.ui.wizards.Messages;
 
 public class MicroProjectTab extends AbstractJavaMainTab {
@@ -229,13 +223,9 @@ public class MicroProjectTab extends AbstractJavaMainTab {
 				config.setAttribute(ATTR_PROJECT_NAME, projectName);
 				config.setAttribute(ATTR_WORKING_DIRECTORY, project.getLocation().toOSString());
 				config.setAttribute(ATTR_BUILD_SCOPE, "${projects:" + project.getName() + "}");
-				Map<String, String> env = config.getAttribute(ATTR_ENVIRONMENT_VARIABLES, Collections.emptyMap());
-				if (env.isEmpty()) {
-					config.setAttribute(ATTR_ENVIRONMENT_VARIABLES, env = new HashMap<>());
-				}
-				if (!env.containsKey(JAVA_HOME_ENV_VAR)) {
-					env.put(JAVA_HOME_ENV_VAR, getJavaHome(project));
-				}
+				Map<String, String> env = config.getAttribute(ATTR_ENVIRONMENT_VARIABLES, Map.of());
+				config.setAttribute(ATTR_ENVIRONMENT_VARIABLES,
+						JavaEnvironmentProperty.withProjectJavaHome(env, project));
 				config.setAttribute(ATTR_LOCATION, buildTool.getExecutableHome());
 				boolean hotDeploy = HOT_DEPLOY_ARTIFACT.equals(reloadArtifactCombo.getText());
 				List<String> startCmd = buildTool.getStartCommand(contextPathText.getText(), microVersionText.getText(),
@@ -247,12 +237,6 @@ public class MicroProjectTab extends AbstractJavaMainTab {
 		} catch (Exception ex) {
 			throw new IllegalStateException(ex);
 		}
-	}
-
-	public static String getJavaHome(IProject project) throws CoreException {
-		IJavaProject javaProject = JavaCore.create(project);
-		IVMInstall install = JavaRuntime.getVMInstall(javaProject);
-		return install.getInstallLocation().getAbsolutePath();
 	}
 
 	@Override

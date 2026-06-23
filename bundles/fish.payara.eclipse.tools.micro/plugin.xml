@@ -47,6 +47,30 @@
     </extension>
     
     <extension
+        point="org.eclipse.debug.ui.launchShortcuts">
+        <shortcut
+            class="fish.payara.eclipse.tools.micro.ui.MicroLaunchShortcut"
+            icon="icons/payara-micro.png"
+            id="fish.payara.eclipse.tools.micro.ui.launchShortcut"
+            label="%payara.micro.runConfigurationName"
+            modes="run, debug">
+            <contextualLaunch>
+                <enablement>
+                    <with variable="selection">
+                        <count value="1"/>
+                        <iterate>
+                            <adapt type="org.eclipse.core.resources.IProject">
+                                <test property="org.eclipse.core.resources.projectNature"
+                                      value="org.eclipse.m2e.core.maven2Nature"/>
+                            </adapt>
+                        </iterate>
+                    </with>
+                </enablement>
+            </contextualLaunch>
+        </shortcut>
+    </extension>
+
+    <extension
         point="org.eclipse.debug.ui.launchConfigurationTypeImages">
         <launchConfigurationTypeImage
             configTypeID="fish.payara.eclipse.tools.micro.launchConfigurationType"

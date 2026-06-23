@@ -98,6 +98,7 @@ public class MicroRuntimeProcess extends RuntimeProcess {
 								commands.add(tool.getExecutableHome());
 								commands.addAll(tool.getReloadCommand(hotDeploy, sourcesChanged, metadataChanged));
 								ProcessBuilder pb = new ProcessBuilder(commands);
+								pb.environment().putAll(JavaEnvironmentProperty.withProjectJavaHome(Map.of(), project));
 								pb.directory(new File(project.getLocationURI()));
 								pb.redirectErrorStream(true);
 								pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);

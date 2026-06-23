@@ -16,6 +16,7 @@ import static fish.payara.eclipse.tools.micro.MicroConstants.DEFAULT_DEBUG_PORT;
 import static fish.payara.eclipse.tools.micro.MicroConstants.DEFAULT_HOST;
 import static fish.payara.eclipse.tools.micro.MicroConstants.PLUGIN_ID;
 import static org.eclipse.core.runtime.IStatus.ERROR;
+import static org.eclipse.debug.core.ILaunchManager.ATTR_ENVIRONMENT_VARIABLES;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_ALLOW_TERMINATE;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_CONNECT_MAP;
 import static org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME;
@@ -51,11 +52,27 @@ public class MicroLaunchDelegate extends ProgramLaunchDelegate {
 	@Override
 	public void launch(ILaunchConfiguration configuration, String mode, ILaunch launch, IProgressMonitor monitor)
 			throws CoreException {
-		super.launch(configuration, mode, launch, monitor);
+		super.launch(withProjectJavaHome(configuration), mode, launch, monitor);
 		IProcess tool = launch.getProcesses()[0];
 		if (DEBUG_MODE.equals(mode) && tool instanceof MicroRuntimeProcess) {
 			((MicroRuntimeProcess) tool).setDebuggerConnection(createDebugConfiguration(configuration, monitor));
 		}
+	}
+
+	private ILaunchConfiguration withProjectJavaHome(ILaunchConfiguration configuration) throws CoreException {
+		String projectName = configuration.getAttribute(ATTR_PROJECT_NAME, (String) null);
+		if (projectName == null || projectName.isBlank()) {
+			return configuration;
+		}
+		IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
+		if (!project.exists()) {
+			return configuration;
+		}
+		Map<String, String> env = configuration.getAttribute(ATTR_ENVIRONMENT_VARIABLES, Map.of());
+		ILaunchConfigurationWorkingCopy configurationCopy = configuration.getWorkingCopy();
+		configurationCopy.setAttribute(ATTR_ENVIRONMENT_VARIABLES,
+				JavaEnvironmentProperty.withProjectJavaHome(env, project));
+		return configurationCopy;
 	}
 
 	private ILaunch createDebugConfiguration(ILaunchConfiguration configuration, IProgressMonitor monitor)
